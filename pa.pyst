@@ -1,0 +1,94 @@
+from PyPtt import PTT
+import sys
+import time
+
+ptt_bot = PTT.API(
+    # (預設值) Chinese
+    # language=PTT.i18n.language.CHINESE,
+    language=PTT.i18n.language.ENGLISH)
+ptt_id='wcmein'
+password='wcmwcm'
+try:
+    ptt_bot.login(ptt_id, password)
+except PTT.exceptions.LoginError:
+    ptt_bot.log('登入失敗')
+    sys.exit()
+except PTT.exceptions.WrongIDorPassword:
+    ptt_bot.log('帳號密碼錯誤')
+    sys.exit()
+except PTT.exceptions.LoginTooOften:
+    ptt_bot.log('請稍等一下再登入')
+    sys.exit()
+ptt_bot.log('登入成功')
+
+
+def getDataBySearch():
+    test_list = [
+    ('Python', PTT.data_type.post_search_type.KEYWORD, '[公告]')
+    ]
+
+    for (test_board, search_type, condition) in test_list:
+        last_index = ptt_bot.get_newest_index(
+            PTT.data_type.index_type.BBS,
+            board=test_board)
+        index = ptt_bot.get_newest_index(
+            PTT.data_type.index_type.BBS,
+            test_board,
+            search_type=search_type,
+            search_condition=condition,
+        )
+        print(f'{test_board} 最新文章編號 {last_index}')
+        print(f'{test_board} Keyword最新文章編號 {index}')
+
+        post = ptt_bot.get_post(
+            test_board,
+            post_index=index,
+            search_type=search_type,
+            search_condition=condition,
+        )
+
+        print('標題:')
+        print(post.title)
+        #print('內文:')
+        #print(post.content)
+        #print('=' * 50)
+
+        print('TIME:')
+        print(post.date)
+        print(post.list_date)
+        print('--------------------------------')
+        time.sleep(3)
+
+def getDataByID():
+    for i in range(0,20):
+        idx=7486+i
+        post_info = ptt_bot.get_post(
+            'Python',
+            post_index=idx)
+            #post_index=7486)
+
+        print('Board: ' + post_info.board)
+        print('AID: ' + post_info.aid)
+        print('index:' + str(post_info.index))
+        print('Author: ' + post_info.author)
+        print('Date: ' + post_info.date)
+        print('Title: ' + post_info.title)
+        print('content: ' + post_info.content)
+        print('Money: ' + str(post_info.money))
+        print('URL: ' + post_info.web_url)
+        print('IP: ' + post_info.ip)
+        # 在文章列表上的日期
+        print('List Date: ' + post_info.list_date)
+        print('地區: ' + post_info.location)
+        # Since 0.8.19
+        # 有可能為 None，因為不是每篇文在文章列表都有推文數
+        try:
+            print('文章推文數: ' + post_info.push_number)
+        except Exception as e:
+            print(e)
+            print('文章推文數: ' + '0')
+        time.sleep(3)
+
+getDataBySearch()
+
+
